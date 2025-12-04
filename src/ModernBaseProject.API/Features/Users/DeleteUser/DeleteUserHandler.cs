@@ -18,10 +18,11 @@ public class DeleteUserHandler : IRequestHandler<DeleteUserCommand>
     {
         var user = await _context.Users.FindAsync(new object[] { request.Id }, cancellationToken);
 
-        if (user == null)
+        if (user == null || user.IsDeleted)
             throw new NotFoundException("User not found");
 
-        _context.Users.Remove(user);
+        user.IsDeleted = true;
+        user.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(cancellationToken);
     }
 }

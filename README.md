@@ -30,7 +30,15 @@ cd src/ModernBaseProject.API
 dotnet run
 ```
 
+3. Run the Frontend:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
 The API will be available at `http://localhost:5000`
+The Frontend will be available at `http://localhost:3000`
 
 ### Default Admin Credentials
 - Email: `admin@domain.com`
@@ -42,12 +50,18 @@ The API will be available at `http://localhost:5000`
 src/
 ├── ModernBaseProject.Core/          # Domain entities, interfaces, exceptions
 ├── ModernBaseProject.Infrastructure/ # EF Core, Authentication, File Storage
-└── ModernBaseProject.API/           # Minimal API with Vertical Slices
-    └── Features/
-        └── Users/
-            ├── Login/
-            ├── CreateUser/
-            └── GetUsersList/
+├── ModernBaseProject.API/           # Minimal API with Vertical Slices
+│   └── Features/
+│       └── Users/
+│           ├── Login/
+│           ├── CreateUser/
+│           └── GetUsersList/
+└── frontend/                        # React TypeScript Frontend
+    └── src/
+        ├── features/                # Feature modules (auth, users, dashboard)
+        ├── stores/                  # Zustand state management
+        ├── lib/                     # Axios, utilities
+        └── components/              # Shared components
 ```
 
 ## 🔑 Key Features
@@ -63,6 +77,16 @@ src/
 - ✅ File Upload (Local Storage)
 - ✅ SignalR for Real-time Notifications
 - ✅ Serilog + Seq Logging
+
+### Frontend
+- ✅ React 18 + TypeScript + Vite
+- ✅ TanStack Query for data fetching
+- ✅ Zustand for state management
+- ✅ React Router for navigation
+- ✅ Axios with auto token refresh
+- ✅ Protected routes
+- ✅ Dashboard layout
+- ✅ User management UI
 
 ### API Endpoints
 
@@ -93,6 +117,15 @@ src/
 - JWT Bearer Authentication
 - SignalR
 - Serilog
+
+### Frontend
+- React 18
+- TypeScript
+- Vite
+- TanStack Query
+- Zustand
+- React Router DOM
+- Axios
 
 ### Infrastructure
 - Docker & Docker Compose
@@ -139,9 +172,11 @@ Swagger UI is available at: `http://localhost:5000/swagger`
 2. ✅ Refresh token endpoint completed
 3. ✅ Permission-based authorization completed
 4. ✅ File upload endpoint completed
-5. Add frontend React application
-6. Configure RabbitMQ + MassTransit
-7. Add Redis caching
+5. ✅ Frontend React application completed
+6. Add user create/edit forms in frontend
+7. Add SignalR real-time notifications in frontend
+8. Configure RabbitMQ + MassTransit
+9. Add Redis caching
 
 ## 📚 Documentation
 

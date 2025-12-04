@@ -7,6 +7,7 @@ using ModernBaseProject.API.Features.Users.GetUsersList;
 using ModernBaseProject.API.Features.Users.Login;
 using ModernBaseProject.API.Features.Users.RefreshToken;
 using ModernBaseProject.API.Features.Users.UpdateUser;
+using ModernBaseProject.API.Features.Roles.GetRolesList;
 using ModernBaseProject.Infrastructure.Persistence;
 using ModernBaseProject.Infrastructure.Persistence.Seeding;
 using Serilog;
@@ -54,6 +55,7 @@ app.MapCreateUserEndpoint();
 app.MapUpdateUserEndpoint();
 app.MapDeleteUserEndpoint();
 app.MapUploadFileEndpoint();
+app.MapGetRolesEndpoint();
 
 app.MapGet("/", () => "Modern Base Project API is running!");
 

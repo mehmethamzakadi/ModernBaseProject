@@ -8,14 +8,16 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        var permissions = context.User.Claims
-            .Where(c => c.Type == "permissions")
-            .Select(c => c.Value)
-            .ToList();
+        var permissionsClaim = context.User.Claims
+            .FirstOrDefault(c => c.Type == "permissions")?.Value;
 
-        if (permissions.Contains(requirement.Permission))
+        if (!string.IsNullOrEmpty(permissionsClaim))
         {
-            context.Succeed(requirement);
+            var permissions = permissionsClaim.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            if (permissions.Contains(requirement.Permission))
+            {
+                context.Succeed(requirement);
+            }
         }
 
         return Task.CompletedTask;
