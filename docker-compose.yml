@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: modernbase-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: modernbase
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - modernbase-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: modernbase-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - modernbase-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: modernbase-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - modernbase-network
+
+  seq:
+    image: datalust/seq
+    container_name: modernbase-seq
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_NOAUTHENTICATION: "true"
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+    networks:
+      - modernbase-network
+
+  maildev:
+    image: maildev/maildev
+    container_name: modernbase-maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    networks:
+      - modernbase-network
+
+volumes:
+  postgres_data:
+  seq_data:
+
+networks:
+  modernbase-network:
+    driver: bridge
