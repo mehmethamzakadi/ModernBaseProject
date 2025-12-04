@@ -8,6 +8,7 @@ using ModernBaseProject.Core.Interfaces;
 using ModernBaseProject.Infrastructure.Authentication;
 using ModernBaseProject.Infrastructure.Authorization;
 using ModernBaseProject.Infrastructure.FileStorage;
+using ModernBaseProject.Infrastructure.Notifications;
 using ModernBaseProject.Infrastructure.Notifications.Hubs;
 using ModernBaseProject.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authorization;
@@ -76,6 +77,7 @@ public static class ServiceExtensions
         // Services
         services.AddScoped<JwtProvider>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
+        services.AddScoped<INotificationService, NotificationService>();
 
         // SignalR
         services.AddSignalR();

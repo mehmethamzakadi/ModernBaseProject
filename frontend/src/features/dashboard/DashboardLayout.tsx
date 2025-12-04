@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore } from '../../stores/notificationStore';
 import { connection, startConnection, stopConnection } from '../../lib/signalr';
+import { NotificationToast } from '../../components/NotificationToast';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuthStore();
@@ -73,6 +74,7 @@ export const DashboardLayout = () => {
           <Outlet />
         </main>
       </div>
+      <NotificationToast />
     </div>
   );
 };

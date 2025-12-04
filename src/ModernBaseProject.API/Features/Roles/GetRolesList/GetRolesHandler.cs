@@ -16,7 +16,6 @@ public class GetRolesHandler : IRequestHandler<GetRolesQuery, List<RoleDto>>
     public async Task<List<RoleDto>> Handle(GetRolesQuery request, CancellationToken cancellationToken)
     {
         return await _context.Roles
-            .Where(r => !r.IsDeleted)
             .Select(r => new RoleDto(r.Id, r.Name))
             .ToListAsync(cancellationToken);
     }
