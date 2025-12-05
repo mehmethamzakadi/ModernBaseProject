@@ -1,7 +1,6 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using ModernBaseProject.Core.Domain.Common;
 using ModernBaseProject.Core.Domain.Entities;
+using ModernBaseProject.Infrastructure.Persistence.Configurations;
 
 namespace ModernBaseProject.Infrastructure.Persistence;
 
@@ -19,51 +18,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Email).IsUnique();
-            entity.HasIndex(e => e.Username).IsUnique();
-            entity.HasMany(e => e.Roles).WithMany(e => e.Users)
-                .UsingEntity<Dictionary<string, object>>("UserRole",
-                    j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
-                    j => j.HasOne<User>().WithMany().HasForeignKey("UserId"));
-        });
-
-        modelBuilder.Entity<Role>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Name).IsUnique();
-        });
-
-        modelBuilder.Entity<Permission>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Key).IsUnique();
-        });
-
-        modelBuilder.Entity<RolePermission>(entity =>
-        {
-            entity.HasKey(e => new { e.RoleId, e.PermissionId });
-            entity.HasOne(e => e.Role).WithMany(r => r.RolePermissions).HasForeignKey(e => e.RoleId);
-            entity.HasOne(e => e.Permission).WithMany(p => p.RolePermissions).HasForeignKey(e => e.PermissionId);
-        });
-
-        modelBuilder.Entity<FileAttachment>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-        });
-
-        // Global query filter for soft delete
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-        {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
-            {
-                var parameter = Expression.Parameter(entityType.ClrType, "e");
-                var property = Expression.Property(parameter, nameof(BaseEntity.IsDeleted));
-                var filter = Expression.Lambda(Expression.Not(property), parameter);
-                modelBuilder.Entity(entityType.ClrType).HasQueryFilter(filter);
-            }
-        }
+        // Apply all entity configurations
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }
