@@ -8,7 +8,7 @@ public static class UpdateUserEndpoint
 {
     public static void MapUpdateUserEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPut("/api/users/{id}", async (Guid id, [FromBody] UpdateUserRequest request, IMediator mediator) =>
+        app.MapPut(ApiRoutes.UsersById, async (Guid id, [FromBody] UpdateUserRequest request, IMediator mediator) =>
         {
             var command = new UpdateUserCommand(id, request.Username, request.Email, request.IsActive, request.RoleIds);
             var response = await mediator.Send(command);

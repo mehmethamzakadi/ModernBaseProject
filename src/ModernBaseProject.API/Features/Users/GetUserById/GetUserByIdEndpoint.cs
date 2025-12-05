@@ -7,7 +7,7 @@ public static class GetUserByIdEndpoint
 {
     public static void MapGetUserByIdEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/users/{id}", async (Guid id, IMediator mediator) =>
+        app.MapGet(ApiRoutes.UsersById, async (Guid id, IMediator mediator) =>
         {
             var response = await mediator.Send(new GetUserByIdQuery(id));
             return Results.Ok(response);

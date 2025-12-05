@@ -1,10 +1,12 @@
+using ModernBaseProject.Core.Constants;
+
 namespace ModernBaseProject.Core.Exceptions;
 
 public class ValidationException : Exception
 {
     public IDictionary<string, string[]> Errors { get; }
 
-    public ValidationException(IDictionary<string, string[]> errors) : base("Validation failed")
+    public ValidationException(IDictionary<string, string[]> errors) : base(ExceptionMessages.ValidationFailed)
     {
         Errors = errors;
     }

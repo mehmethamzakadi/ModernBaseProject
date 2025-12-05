@@ -4,6 +4,7 @@ import { useAuthStore } from '../../stores/authStore';
 import { useNotificationStore } from '../../stores/notificationStore';
 import { connection, startConnection } from '../../lib/signalr';
 import { NotificationToast } from '../../components/NotificationToast';
+import { APP_ROUTES } from '../../constants';
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuthStore();
@@ -24,7 +25,7 @@ export const DashboardLayout = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate(APP_ROUTES.LOGIN);
   };
 
   return (
@@ -35,19 +36,19 @@ export const DashboardLayout = () => {
         </div>
         <nav className="mt-6">
           <Link
-            to="/dashboard"
+            to={APP_ROUTES.DASHBOARD}
             className="block px-6 py-3 hover:bg-gray-700 transition"
           >
             Dashboard
           </Link>
           <Link
-            to="/dashboard/users"
+            to={`${APP_ROUTES.DASHBOARD}/users`}
             className="block px-6 py-3 hover:bg-gray-700 transition"
           >
             Users
           </Link>
           <Link
-            to="/dashboard/files"
+            to={`${APP_ROUTES.DASHBOARD}/files`}
             className="block px-6 py-3 hover:bg-gray-700 transition"
           >
             Files

@@ -7,7 +7,7 @@ public static class GetUsersEndpoint
 {
     public static void MapGetUsersEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/users", async (IMediator mediator, HttpContext context) =>
+        app.MapGet(ApiRoutes.Users, async (IMediator mediator, HttpContext context) =>
         {
             var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
             Console.WriteLine($"Auth Header: {authHeader}");

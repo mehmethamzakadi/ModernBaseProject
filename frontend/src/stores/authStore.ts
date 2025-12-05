@@ -1,5 +1,6 @@
-import { create } from 'zustand';
-import type { User } from '../types';
+import { create } from "zustand";
+import { STORAGE_KEYS } from "../constants";
+import type { User } from "../types";
 
 interface AuthState {
   user: User | null;
@@ -12,12 +13,12 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  accessToken: localStorage.getItem('accessToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken'),
+  accessToken: localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
+  isAuthenticated: !!localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN),
 
   setAuth: (user, accessToken, refreshToken) => {
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+    localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     set({ user, accessToken, isAuthenticated: true });
   },
 

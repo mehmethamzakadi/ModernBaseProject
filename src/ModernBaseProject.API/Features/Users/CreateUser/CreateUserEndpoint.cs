@@ -8,10 +8,10 @@ public static class CreateUserEndpoint
 {
     public static void MapCreateUserEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/users", async ([FromBody] CreateUserCommand command, IMediator mediator) =>
+        app.MapPost(ApiRoutes.Users, async ([FromBody] CreateUserCommand command, IMediator mediator) =>
         {
             var response = await mediator.Send(command);
-            return Results.Created($"/api/users/{response.Id}", response);
+            return Results.Created($"{ApiRoutes.Users}/{response.Id}", response);
         })
         .RequireAuthorization(Permissions.UserCreate)
         .WithName("CreateUser")

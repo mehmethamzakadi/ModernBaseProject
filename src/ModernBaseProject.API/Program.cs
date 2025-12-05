@@ -8,6 +8,7 @@ using ModernBaseProject.API.Features.Users.Login;
 using ModernBaseProject.API.Features.Users.RefreshToken;
 using ModernBaseProject.API.Features.Users.UpdateUser;
 using ModernBaseProject.API.Features.Roles.GetRolesList;
+using ModernBaseProject.Core.Constants;
 using ModernBaseProject.Infrastructure.Persistence;
 using ModernBaseProject.Infrastructure.Persistence.Seeding;
 using Serilog;
@@ -18,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .WriteTo.Console()
-    .WriteTo.Seq(builder.Configuration["Seq:Url"] ?? "http://localhost:5341")
+    .WriteTo.Seq(builder.Configuration[ConfigurationKeys.Seq.Url] ?? "http://localhost:5341")
     .CreateLogger();
 
 builder.Host.UseSerilog();

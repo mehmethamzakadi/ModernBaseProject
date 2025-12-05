@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ModernBaseProject.Core.Behaviors;
+using ModernBaseProject.Core.Constants;
 using ModernBaseProject.Core.Interfaces;
 using ModernBaseProject.Infrastructure.Authentication;
 using ModernBaseProject.Infrastructure.Authorization;
@@ -21,7 +22,7 @@ public static class ServiceExtensions
     {
         // Database
         services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
+            options.UseNpgsql(configuration.GetConnectionString(ConfigurationKeys.DefaultConnection)));
 
         // MediatR
         services.AddMediatR(cfg =>
@@ -43,19 +44,19 @@ public static class ServiceExtensions
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = configuration["Jwt:Issuer"],
-                    ValidAudience = configuration["Jwt:Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!))
+                    ValidIssuer = configuration[ConfigurationKeys.Jwt.Issuer],
+                    ValidAudience = configuration[ConfigurationKeys.Jwt.Audience],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration[ConfigurationKeys.Jwt.Key]!))
                 };
-                
+
                 // SignalR için token'ı query string'den al
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
                     {
-                        var accessToken = context.Request.Query["access_token"];
+                        var accessToken = context.Request.Query[SignalRDefaults.AccessTokenQueryParameter];
                         var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments(ApiRoutes.SignalR))
                         {
                             context.Token = accessToken;
                         }
@@ -66,10 +67,10 @@ public static class ServiceExtensions
 
         services.AddAuthorization(options =>
         {
-            options.AddPolicy("User.Create", policy => policy.Requirements.Add(new PermissionRequirement("User.Create")));
-            options.AddPolicy("User.Read", policy => policy.Requirements.Add(new PermissionRequirement("User.Read")));
-            options.AddPolicy("User.Update", policy => policy.Requirements.Add(new PermissionRequirement("User.Update")));
-            options.AddPolicy("User.Delete", policy => policy.Requirements.Add(new PermissionRequirement("User.Delete")));
+            options.AddPolicy(Permissions.UserCreate, policy => policy.Requirements.Add(new PermissionRequirement(Permissions.UserCreate)));
+            options.AddPolicy(Permissions.UserRead, policy => policy.Requirements.Add(new PermissionRequirement(Permissions.UserRead)));
+            options.AddPolicy(Permissions.UserUpdate, policy => policy.Requirements.Add(new PermissionRequirement(Permissions.UserUpdate)));
+            options.AddPolicy(Permissions.UserDelete, policy => policy.Requirements.Add(new PermissionRequirement(Permissions.UserDelete)));
         });
 
         services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -85,7 +86,7 @@ public static class ServiceExtensions
         // CORS
         services.AddCors(options =>
         {
-            options.AddPolicy("AllowAll", builder =>
+            options.AddPolicy(CorsPolicies.AllowAll, builder =>
             {
                 builder.WithOrigins("http://localhost:3000")
                        .AllowAnyMethod()
@@ -100,11 +101,11 @@ public static class ServiceExtensions
     public static WebApplication ConfigureApplication(this WebApplication app)
     {
         app.UseMiddleware<API.Middleware.GlobalExceptionHandler>();
-        app.UseCors("AllowAll");
+        app.UseCors(CorsPolicies.AllowAll);
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseStaticFiles();
-        app.MapHub<NotificationHub>("/hubs/notifications");
+        app.MapHub<NotificationHub>(ApiRoutes.NotificationsHub);
         return app;
     }
 }

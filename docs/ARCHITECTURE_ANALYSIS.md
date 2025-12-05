@@ -6,7 +6,7 @@ Bu proje, kurumsal standartlarda, yüksek performanslı, modüler ve dağıtık 
 
 | Alan                     | Teknoloji / Kütüphane             | Notlar                                       |
 | ------------------------ | --------------------------------- | -------------------------------------------- |
-| **Backend Framework**    | .NET 10 (Latest)          | Minimal API, C# 13/14 özellikleri            |
+| **Backend Framework**    | .NET 10 (Latest)                  | Minimal API, C# 13/14 özellikleri            |
 | **Mimari Desen**         | Vertical Slice Architecture (VSA) | Feature-based folder structure               |
 | **Frontend**             | React + TypeScript                | Vite build tool ile                          |
 | **Database**             | PostgreSQL                        | JSONB desteği ve yüksek performans için      |
@@ -43,6 +43,17 @@ src/
 │   │       ├── Permission.cs
 │   │       ├── RolePermission.cs
 │   │       └── FileAttachment.cs
+│   ├── Constants/
+│   │   ├── ApiRoutes.cs
+│   │   ├── JwtClaims.cs
+│   │   ├── Roles.cs
+│   │   ├── Permissions.cs
+│   │   ├── SeederConstants.cs
+│   │   ├── ConfigurationKeys.cs
+│   │   ├── CorsPolicies.cs
+│   │   ├── JwtDefaults.cs
+│   │   ├── SignalRDefaults.cs
+│   │   └── ExceptionMessages.cs
 │   ├── Exceptions/
 │   │   ├── NotFoundException.cs
 │   │   ├── ValidationException.cs
@@ -109,7 +120,50 @@ src/
 
 - **Query Splitting**: Büyük join işlemlerinde `.AsSplitQuery()` varsayılan davranış olarak değerlendirilecek.
 
-### 2.3. Dosya Yönetim Sistemi (File Storage)
+### 2.3. Constants ve Magic String Yönetimi
+
+Projede **Magic String** (hardcoded string değerler) kullanımından kaçınılır. Tüm sabit değerler merkezi `Constants` klasöründe organize edilmiştir.
+
+**Constants Yapısı** (`ModernBaseProject.Core/Constants/`):
+
+- **ApiRoutes.cs**: API endpoint path'leri (`/api/auth/login`, `/api/users`, vb.)
+- **JwtClaims.cs**: JWT token claim type isimleri (`permissions`, `sub`, `email`)
+- **Roles.cs**: Sistem rol isimleri (`SuperAdmin`, vb.)
+- **Permissions.cs**: Permission key'leri (`User.Create`, `User.Read`, vb.)
+- **SeederConstants.cs**: Database seed değerleri (admin email, password, vb.)
+- **ConfigurationKeys.cs**: Configuration section key'leri (`Jwt:Key`, `DefaultConnection`, vb.)
+- **CorsPolicies.cs**: CORS policy isimleri
+- **JwtDefaults.cs**: JWT varsayılan değerleri (token expiry süreleri)
+- **SignalRDefaults.cs**: SignalR varsayılan değerleri
+- **ExceptionMessages.cs**: Exception mesajları
+
+**Kullanım Örnekleri**:
+
+```csharp
+// ❌ Magic String Kullanımı (Yanlış)
+app.MapPost("/api/auth/login", ...);
+options.AddPolicy("User.Create", ...);
+var email = "admin@domain.com";
+
+// ✅ Constants Kullanımı (Doğru)
+app.MapPost(ApiRoutes.Login, ...);
+options.AddPolicy(Permissions.UserCreate, ...);
+var email = SeederConstants.AdminEmail;
+```
+
+**Frontend Constants**: Frontend tarafında da `frontend/src/constants/index.ts` dosyasında tüm sabit değerler (API routes, localStorage keys, app routes, permissions) merkezi olarak yönetilir.
+
+**Faydalar**:
+
+- ✅ Tip güvenliği ve IntelliSense desteği
+- ✅ Yazım hatalarının compile-time'da yakalanması
+- ✅ Refactoring kolaylığı
+- ✅ Kod tekrarının azalması
+- ✅ Bakım kolaylığı
+
+Detaylı bilgi için: [MAGIC_STRINGS_SOLUTION.md](MAGIC_STRINGS_SOLUTION.md)
+
+### 2.4. Dosya Yönetim Sistemi (File Storage)
 
 Sistem soyut bir yapı üzerine kurulacak, böylece ortam (Local/Cloud) değişse de kod değişmeyecek.
 
@@ -122,7 +176,7 @@ Sistem soyut bir yapı üzerine kurulacak, böylece ortam (Local/Cloud) değişs
 
 **Veritabanı Takibi**: Yüklenen dosyaların metadata'sı (Dosya adı, uzantısı, boyutu, yolu, yükleyen user) `FileAttachments` tablosunda tutulacak.
 
-### 2.4. Bildirim Sistemi (Notification System)
+### 2.5. Bildirim Sistemi (Notification System)
 
 Bildirimler ikiye ayrılacak: **Anlık (Real-time)** ve **Asenkron (Email/SMS)**.
 
@@ -137,7 +191,7 @@ Bildirimler ikiye ayrılacak: **Anlık (Real-time)** ve **Asenkron (Email/SMS)**
 - `SendEmailCommand` → RabbitMQ → `EmailConsumer`
 - Consumer içinde SMTP veya 3. parti (SendGrid/Mailgun) servisleri çağrılır.
 
-### 2.5. Kimlik Yönetimi ve RBAC (Auth)
+### 2.6. Kimlik Yönetimi ve RBAC (Auth)
 
 Keycloak yerine, tam kontrollü yerel bir yapı kurulacak.
 
@@ -165,6 +219,7 @@ React projesi de Backend'in Feature yapısına benzer modülerlikte olacak.
 src/
 ├── app/ (Routing, Provider setup)
 ├── components/ (Shared UI components - Shadcn/UI)
+├── constants/ (API routes, storage keys, app routes, permissions)
 ├── features/  <-- BACKEND İLE EŞLENİK YAPILAR
 │   ├── auth/ (Login form, register, hooks)
 │   ├── users/ (UserList, UserForm, user-service.ts)
@@ -179,10 +234,35 @@ src/
 - **Veri çekme işlemleri** (Users list, Product details) için **TanStack Query (React Query)** kullanılacak. "Stale-while-revalidate" stratejisi ile kullanıcıya anında veri gösterilecek.
 - **Client state** (Modal açık mı, Sidebar kapalı mı) için **Zustand** kullanılacak.
 
+### Frontend Constants
+
+Backend'deki Constants yaklaşımına benzer şekilde, frontend'de de tüm magic string'ler merkezi `constants/index.ts` dosyasında yönetilir:
+
+- **API_ROUTES**: API endpoint path'leri
+- **STORAGE_KEYS**: localStorage key'leri (`accessToken`, `refreshToken`)
+- **APP_ROUTES**: Uygulama route'ları (`/login`, `/dashboard`)
+- **PERMISSIONS**: Permission key'leri (backend ile senkronize)
+- **HTTP_HEADERS**: HTTP header isimleri ve değerleri
+- **DEFAULT_URLS**: Varsayılan API ve SignalR URL'leri
+
+**Kullanım Örnekleri**:
+
+```typescript
+// ❌ Magic String (Yanlış)
+await api.post("/auth/login", credentials);
+localStorage.getItem("accessToken");
+<Route path="/login" element={<LoginPage />} />;
+
+// ✅ Constants (Doğru)
+await api.post(API_ROUTES.AUTH.LOGIN, credentials);
+localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+<Route path={APP_ROUTES.LOGIN} element={<LoginPage />} />;
+```
+
 ### Admin Dashboard
 
 - **Layout**: Sidebar, Header (User profile, Notifications bell), Content Area
-- **Yetki Yönetimi**: Frontend tarafında `<PermissionGuard permission="User.Create"> <Button>Ekle</Button> </PermissionGuard>` bileşeni ile yetkisi olmayana butonlar gizlenecek.
+- **Yetki Yönetimi**: Frontend tarafında `<PermissionGuard permission={PERMISSIONS.USER_CREATE}> <Button>Ekle</Button> </PermissionGuard>` bileşeni ile yetkisi olmayana butonlar gizlenecek. Permission string'leri `PERMISSIONS` constant'ından kullanılır.
 
 ---
 
@@ -215,5 +295,7 @@ Proje ilk kez çalıştığında (`Program.cs` start):
 
 1. **Migration Check**: DB var mı kontrol eder, yoksa oluşturur ve bekleyen migrationları basar.
 2. **Permission Seed**: Kod içerisindeki (Controller veya Endpointlerdeki attribute'lardan okunan) tüm izin tanımlarını `Permissions` tablosuna yazar/günceller.
-3. **Admin Seed**: `admin@domain.com` kullanıcısı yoksa oluşturur.
-4. **Role Assign**: Admin kullanıcısına `SuperAdmin` rolünü ve tüm permissionları atar.
+3. **Admin Seed**: `SeederConstants.AdminEmail` (`admin@domain.com`) kullanıcısı yoksa oluşturur.
+4. **Role Assign**: Admin kullanıcısına `Roles.SuperAdmin` rolünü ve tüm permissionları (`Permissions` sınıfından) atar.
+
+**Not**: Tüm seed değerleri `SeederConstants`, rol isimleri `Roles`, permission key'leri ise `Permissions` constant'larından kullanılır. Magic string kullanımından kaçınılır.

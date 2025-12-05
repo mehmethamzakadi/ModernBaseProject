@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ModernBaseProject.Core.Constants;
 using ModernBaseProject.Core.Domain.Entities;
 using ModernBaseProject.Infrastructure.Authentication;
 
@@ -13,10 +14,10 @@ public static class DatabaseSeeder
         // Seed Permissions
         var permissions = new List<Permission>
         {
-            new() { Id = Guid.NewGuid(), Key = "User.Create", Description = "Create users", CreatedAt = DateTime.UtcNow },
-            new() { Id = Guid.NewGuid(), Key = "User.Read", Description = "Read users", CreatedAt = DateTime.UtcNow },
-            new() { Id = Guid.NewGuid(), Key = "User.Update", Description = "Update users", CreatedAt = DateTime.UtcNow },
-            new() { Id = Guid.NewGuid(), Key = "User.Delete", Description = "Delete users", CreatedAt = DateTime.UtcNow }
+            new() { Id = Guid.NewGuid(), Key = Permissions.UserCreate, Description = "Create users", CreatedAt = DateTime.UtcNow },
+            new() { Id = Guid.NewGuid(), Key = Permissions.UserRead, Description = "Read users", CreatedAt = DateTime.UtcNow },
+            new() { Id = Guid.NewGuid(), Key = Permissions.UserUpdate, Description = "Update users", CreatedAt = DateTime.UtcNow },
+            new() { Id = Guid.NewGuid(), Key = Permissions.UserDelete, Description = "Delete users", CreatedAt = DateTime.UtcNow }
         };
 
         foreach (var permission in permissions)
@@ -27,13 +28,13 @@ public static class DatabaseSeeder
         await context.SaveChangesAsync();
 
         // Seed SuperAdmin Role
-        var superAdminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == "SuperAdmin");
+        var superAdminRole = await context.Roles.FirstOrDefaultAsync(r => r.Name == Roles.SuperAdmin);
         if (superAdminRole == null)
         {
             superAdminRole = new Role
             {
                 Id = Guid.NewGuid(),
-                Name = "SuperAdmin",
+                Name = Roles.SuperAdmin,
                 CreatedAt = DateTime.UtcNow
             };
             await context.Roles.AddAsync(superAdminRole);
@@ -56,15 +57,15 @@ public static class DatabaseSeeder
         await context.SaveChangesAsync();
 
         // Seed Admin User
-        var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "admin@domain.com");
+        var adminUser = await context.Users.FirstOrDefaultAsync(u => u.Email == SeederConstants.AdminEmail);
         if (adminUser == null)
         {
             adminUser = new User
             {
                 Id = Guid.NewGuid(),
-                Username = "admin",
-                Email = "admin@domain.com",
-                PasswordHash = PasswordHasher.HashPassword("Admin123!"),
+                Username = SeederConstants.AdminUsername,
+                Email = SeederConstants.AdminEmail,
+                PasswordHash = PasswordHasher.HashPassword(SeederConstants.AdminPassword),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };

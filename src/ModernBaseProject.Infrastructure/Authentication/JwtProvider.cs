@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using ModernBaseProject.Core.Constants;
 using ModernBaseProject.Core.Domain.Entities;
 
 namespace ModernBaseProject.Infrastructure.Authentication;
@@ -23,17 +24,17 @@ public class JwtProvider
         {
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new("permissions", string.Join(",", permissions))
+            new(JwtClaims.Permissions, string.Join(",", permissions))
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration[ConfigurationKeys.Jwt.Key]!));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: _configuration[ConfigurationKeys.Jwt.Issuer],
+            audience: _configuration[ConfigurationKeys.Jwt.Audience],
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(30),
+            expires: DateTime.UtcNow.AddMinutes(JwtDefaults.AccessTokenExpiryMinutes),
             signingCredentials: credentials
         );
 

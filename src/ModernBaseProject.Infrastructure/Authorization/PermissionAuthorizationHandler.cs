@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using ModernBaseProject.Core.Constants;
 
 namespace ModernBaseProject.Infrastructure.Authorization;
 
@@ -9,7 +10,7 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
         PermissionRequirement requirement)
     {
         var permissionsClaim = context.User.Claims
-            .FirstOrDefault(c => c.Type == "permissions")?.Value;
+            .FirstOrDefault(c => c.Type == JwtClaims.Permissions)?.Value;
 
         if (!string.IsNullOrEmpty(permissionsClaim))
         {

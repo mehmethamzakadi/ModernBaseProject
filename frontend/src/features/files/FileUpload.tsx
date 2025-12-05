@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '../../lib/axios';
+import { API_ROUTES } from '../../constants';
 
 export const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -9,7 +10,7 @@ export const FileUpload = () => {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      const { data } = await api.post('/files/upload', formData, {
+      const { data } = await api.post(API_ROUTES.FILES.UPLOAD, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       return data;

@@ -7,6 +7,7 @@ import { UserListPage } from './features/users/UserListPage';
 import { FileUpload } from './features/files/FileUpload';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { NotificationToast } from './components/NotificationToast';
+import { APP_ROUTES } from './constants';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,9 +24,9 @@ function App() {
       <BrowserRouter>
         <NotificationToast />
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route path={APP_ROUTES.LOGIN} element={<LoginPage />} />
           <Route
-            path="/dashboard"
+            path={APP_ROUTES.DASHBOARD}
             element={
               <ProtectedRoute>
                 <DashboardLayout />
@@ -36,7 +37,7 @@ function App() {
             <Route path="users" element={<UserListPage />} />
             <Route path="files" element={<FileUpload />} />
           </Route>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to={APP_ROUTES.DASHBOARD} replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

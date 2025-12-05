@@ -1,10 +1,11 @@
 import * as signalR from '@microsoft/signalr';
+import { DEFAULT_URLS, STORAGE_KEYS } from '../constants';
 
-const SIGNALR_URL = import.meta.env.VITE_SIGNALR_URL || 'http://localhost:5000/hubs/notifications';
+const SIGNALR_URL = import.meta.env.VITE_SIGNALR_URL || DEFAULT_URLS.SIGNALR_URL;
 
 export const connection = new signalR.HubConnectionBuilder()
   .withUrl(SIGNALR_URL, {
-    accessTokenFactory: () => localStorage.getItem('accessToken') || '',
+    accessTokenFactory: () => localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) || '',
   })
   .withAutomaticReconnect()
   .build();

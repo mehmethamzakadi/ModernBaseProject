@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from './userService';
 import { UserForm } from './UserForm';
 import { PermissionGuard } from '../../components/PermissionGuard';
+import { PERMISSIONS } from '../../constants';
 import type { User } from '../../types';
 
 export const UserListPage = () => {
@@ -44,7 +45,7 @@ export const UserListPage = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Users</h1>
-        <PermissionGuard permission="User.Create">
+        <PermissionGuard permission={PERMISSIONS.USER_CREATE}>
           <button
             onClick={() => setShowForm(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
@@ -77,7 +78,7 @@ export const UserListPage = () => {
                 </td>
                 <td className="px-6 py-4">{user.roles?.map((r) => r.name).join(', ') || '-'}</td>
                 <td className="px-6 py-4 space-x-2">
-                  <PermissionGuard permission="User.Update">
+                  <PermissionGuard permission={PERMISSIONS.USER_UPDATE}>
                     <button
                       onClick={() => handleEdit(user)}
                       className="text-blue-600 hover:text-blue-800"
@@ -85,7 +86,7 @@ export const UserListPage = () => {
                       Edit
                     </button>
                   </PermissionGuard>
-                  <PermissionGuard permission="User.Delete">
+                  <PermissionGuard permission={PERMISSIONS.USER_DELETE}>
                     <button
                       onClick={() => handleDelete(user)}
                       disabled={deleteMutation.isPending}
