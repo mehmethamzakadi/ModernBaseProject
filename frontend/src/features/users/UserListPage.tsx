@@ -1,15 +1,37 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { MoreHorizontal, Pencil, Trash2, Plus, Search } from 'lucide-react';
 import { userService } from './userService';
 import { UserForm } from './UserForm';
 import { PermissionGuard } from '../../components/PermissionGuard';
+import { PageHeader } from '../../components/layout/PageHeader';
 import { PERMISSIONS } from '../../constants';
 import type { User } from '../../types';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Badge } from '../../components/ui/badge';
+import { Avatar, AvatarFallback } from '../../components/ui/avatar';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../../components/ui/dropdown-menu';
+import { Card } from '../../components/ui/card';
 
 export const UserListPage = () => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [editUser, setEditUser] = useState<User | undefined>();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['users'],
@@ -39,68 +61,110 @@ export const UserListPage = () => {
     }
   };
 
-  if (isLoading) return <div className="p-6">Loading...</div>;
+  const filteredUsers = users?.filter(
+    (user) =>
+      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (isLoading) return <div className="flex items-center justify-center h-64">Loading...</div>;
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Users</h1>
-        <PermissionGuard permission={PERMISSIONS.USER_CREATE}>
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            Create User
-          </button>
-        </PermissionGuard>
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="User Management"
+        description="Manage system users and permissions"
+        action={
+          <PermissionGuard permission={PERMISSIONS.USER_CREATE}>
+            <Button onClick={() => setShowForm(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add User
+            </Button>
+          </PermissionGuard>
+        }
+      />
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Username</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Roles</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {users?.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4">{user.username}</td>
-                <td className="px-6 py-4">{user.email}</td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded-full text-xs ${user.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+      <Card>
+        <div className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Input
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </div>
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="w-[70px]"></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers?.map((user) => (
+              <TableRow key={user.id}>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-9 w-9">
+                      <AvatarFallback className="bg-indigo-100 text-indigo-700 text-sm">
+                        {user.username.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-slate-900">{user.username}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="text-slate-600">{user.email}</TableCell>
+                <TableCell>
+                  {user.roles?.map((role) => (
+                    <Badge key={role.id} variant="secondary">
+                      {role.name}
+                    </Badge>
+                  )) || <span className="text-slate-400">-</span>}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={user.isActive ? 'default' : 'destructive'}>
                     {user.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4">{user.roles?.map((r) => r.name).join(', ') || '-'}</td>
-                <td className="px-6 py-4 space-x-2">
-                  <PermissionGuard permission={PERMISSIONS.USER_UPDATE}>
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      Edit
-                    </button>
-                  </PermissionGuard>
-                  <PermissionGuard permission={PERMISSIONS.USER_DELETE}>
-                    <button
-                      onClick={() => handleDelete(user)}
-                      disabled={deleteMutation.isPending}
-                      className="text-red-600 hover:text-red-800 disabled:opacity-50"
-                    >
-                      Delete
-                    </button>
-                  </PermissionGuard>
-                </td>
-              </tr>
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <PermissionGuard permission={PERMISSIONS.USER_UPDATE}>
+                        <DropdownMenuItem onClick={() => handleEdit(user)}>
+                          <Pencil className="mr-2 h-4 w-4" />
+                          Edit
+                        </DropdownMenuItem>
+                      </PermissionGuard>
+                      <PermissionGuard permission={PERMISSIONS.USER_DELETE}>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(user)}
+                          disabled={deleteMutation.isPending}
+                          className="text-red-600"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Delete
+                        </DropdownMenuItem>
+                      </PermissionGuard>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </Table>
+      </Card>
 
       {showForm && <UserForm user={editUser} onClose={handleCloseForm} />}
     </div>

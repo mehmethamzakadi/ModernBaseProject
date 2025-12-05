@@ -16,8 +16,14 @@ public class GetUsersHandler : IRequestHandler<GetUsersQuery, List<UserDto>>
     public async Task<List<UserDto>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
     {
         return await _context.Users
-            .Where(u => u.IsActive)
-            .Select(u => new UserDto(u.Id, u.Username, u.Email, u.IsActive))
+            .Include(u => u.Roles)
+            .Select(u => new UserDto(
+                u.Id, 
+                u.Username, 
+                u.Email, 
+                u.IsActive,
+                u.Roles.Select(r => new RoleDto(r.Id, r.Name)).ToList()
+            ))
             .ToListAsync(cancellationToken);
     }
 }

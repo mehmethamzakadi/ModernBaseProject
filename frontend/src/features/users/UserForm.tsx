@@ -3,6 +3,24 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { userService } from './userService';
 import { roleService } from '../roles/roleService';
 import type { User } from '../../types';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Checkbox } from '../../components/ui/checkbox';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '../../components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../../components/ui/select';
 
 interface UserFormProps {
   user?: User;
@@ -40,94 +58,91 @@ export const UserForm = ({ user, onClose }: UserFormProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-4">{user ? 'Edit User' : 'Create User'}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">Username</label>
-            <input
-              type="text"
+    <Sheet open onOpenChange={onClose}>
+      <SheetContent className="sm:max-w-[540px]">
+        <SheetHeader>
+          <SheetTitle>{user ? 'Edit User' : 'Create New User'}</SheetTitle>
+          <SheetDescription>
+            {user ? 'Update user information and permissions' : 'Add a new user to the system'}
+          </SheetDescription>
+        </SheetHeader>
+        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+          <div className="space-y-2">
+            <Label htmlFor="username">Username</Label>
+            <Input
+              id="username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
           {!user && (
-            <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium mb-1">Roles</label>
-            <select
-              multiple
-              value={formData.roleIds}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  roleIds: Array.from(e.target.selectedOptions, (option) => option.value),
-                })
-              }
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              value={formData.roleIds[0] || ''}
+              onValueChange={(value) => setFormData({ ...formData, roleIds: [value] })}
             >
-              {roles.map((role: any) => (
-                <option key={role.id} value={role.id}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((role: any) => (
+                  <SelectItem key={role.id} value={role.id}>
+                    {role.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="active"
               checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="mr-2"
+              onCheckedChange={(checked) => setFormData({ ...formData, isActive: !!checked })}
             />
-            <label className="text-sm font-medium">Active</label>
-          </div>
-          <div className="flex gap-2 pt-4">
-            <button
-              type="submit"
-              disabled={mutation.isPending}
-              className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50"
-            >
-              {mutation.isPending ? 'Saving...' : 'Save'}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
-            >
-              Cancel
-            </button>
+            <Label htmlFor="active" className="text-sm font-normal cursor-pointer">
+              Active user
+            </Label>
           </div>
           {mutation.isError && (
-            <p className="text-red-500 text-sm">
-              {(mutation.error as any)?.response?.data?.message || 'Failed to save user'}
-            </p>
+            <div className="rounded-md bg-red-50 p-3">
+              <p className="text-sm text-red-800">
+                {(mutation.error as any)?.response?.data?.message || 'Failed to save user'}
+              </p>
+            </div>
           )}
+          <div className="flex gap-3 pt-4">
+            <Button type="submit" disabled={mutation.isPending} className="flex-1">
+              {mutation.isPending ? 'Saving...' : user ? 'Update User' : 'Create User'}
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+              Cancel
+            </Button>
+          </div>
         </form>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 };

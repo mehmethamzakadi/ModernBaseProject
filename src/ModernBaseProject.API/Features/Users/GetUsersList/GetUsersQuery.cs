@@ -4,4 +4,6 @@ namespace ModernBaseProject.API.Features.Users.GetUsersList;
 
 public record GetUsersQuery : IRequest<List<UserDto>>;
 
-public record UserDto(Guid Id, string Username, string Email, bool IsActive);
+public record UserDto(Guid Id, string Username, string Email, bool IsActive, List<RoleDto> Roles);
+
+public record RoleDto(Guid Id, string Name);

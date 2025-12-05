@@ -23,19 +23,26 @@ public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, UpdateUserRe
         if (user == null)
             throw new NotFoundException("User not found");
 
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email && u.Id != request.Id, cancellationToken))
+        if (await _context.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower() && u.Id != request.Id, cancellationToken))
             throw new ValidationException("Email already exists");
 
         user.Username = request.Username;
         user.Email = request.Email;
         user.IsActive = request.IsActive;
 
-        var roles = await _context.Roles
-            .Where(r => request.RoleIds.Contains(r.Id))
-            .ToListAsync(cancellationToken);
-
         user.Roles.Clear();
-        user.Roles = roles;
+        
+        if (request.RoleIds.Any())
+        {
+            var roles = await _context.Roles
+                .Where(r => request.RoleIds.Contains(r.Id))
+                .ToListAsync(cancellationToken);
+            
+            foreach (var role in roles)
+            {
+                user.Roles.Add(role);
+            }
+        }
 
         await _context.SaveChangesAsync(cancellationToken);
 

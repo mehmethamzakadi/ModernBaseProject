@@ -3,8 +3,8 @@ export interface User {
   username: string;
   email: string;
   isActive: boolean;
-  createdAt: string;
-  roles: Role[];
+  createdAt?: string;
+  roles?: Role[];
 }
 
 export interface Role {
